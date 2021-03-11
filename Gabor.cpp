@@ -1,7 +1,11 @@
 #define _USE_MATH_DEFINES
 
-#include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <cmath>
+#include <string>
+
+using namespace std;
 
 double real_inner_product(double *v1, double *v2, int szVector)
 {
@@ -14,36 +18,31 @@ double real_inner_product(double *v1, double *v2, int szVector)
   return sum;
 }
 
-int main(){
-	int i, j, N, M, scale, timeShift;
+int main(int argc, char *argv[]){
+	int i, j, nAtoms, szSignal, scale, timeShift;
 	double frequency, phase, normAtom, tmp, n, m;
-	N = 10;
-	M = 100;
-	n = double(N);
-	m = double(M);
+	string fname;
+	nAtoms = stoi(argv[1]);
+	szSignal = stoi(argv[2]);
+	n = double(nAtoms);
+	m = double(szSignal);
+	fname = "g" + to_string(nAtoms) + to_string(szSignal) + ".txt";
 	scale = 2;
 	timeShift = 0;
 	frequency = 0.01;
 	phase = 0;
 	
-	double atom[N][M];
-	for(i = 0; i<N; i++){
-		for(j = 0; j<M; j++){
-			atom[i][j] = (1/sqrt(scale)) * exp(-M_PI*((j/m-i/n)*(j/m-i/n))/(scale*scale)) * cos(2*M_PI*frequency*(j/M-i/N)+phase);
+	double atom[nAtoms][szSignal];
+	for(i = 0; i<nAtoms; i++){
+		for(j = 0; j<szSignal; j++){
+			atom[i][j] = (1/sqrt(scale)) * exp(-M_PI*((j/m-i/n)*(j/m-i/n))/(scale*scale)) * cos(2*M_PI*frequency*(j/szSignal-i/nAtoms)+phase);
 			printf("%f\n", atom[i][j]);
 		}
 	}
-	for(i = 0; i<N; i++){
-		for(j = 0; j<M; j++){
-    		printf("%f\n", atom[i][j]);
+	ofstream outf(fname);
+	for(i = 0; i<nAtoms; i++){
+		for(j = 0; j<szSignal; j++){
+			outf << to_string(atom[i][j]) << endl;
 		}
 	}
-	for(j = 0; j<N; j++){
-		normAtom = sqrt(real_inner_product(atom[j],atom[j],M));
-		for ( i = 0; i < M; i++)
-    	{
-        	atom[j][i] = atom[j][i]/normAtom;
-    	}
-	}
-    
 }

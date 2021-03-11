@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <string>
 using namespace std;
 
 double* trans_multyplication(double *vector, double *matrix, double *returnVector, int m, int n);
@@ -39,7 +40,7 @@ double vectorNorm(double *first, int N) {
  return sqrt(real_inner_product(first, first, N));
 }
 
-void start(double *vSignal, double *mDictionary, double tolerance1, int szSignal, int nAtoms, double *rSignal)
+void start(double *vSignal, double *mDictionary, double tolerance1, int szSignal, int nAtoms, int szTest, double *rSignal)
 {
     double mNewDictionary[szSignal*nAtoms], mOrthogonalDictionary[szSignal*szSignal], mBiorthogonal[szSignal*szSignal], vCoefficients[nAtoms];
     int iOldDictionary[nAtoms];
@@ -57,10 +58,11 @@ void start(double *vSignal, double *mDictionary, double tolerance1, int szSignal
     chosen = (omp(vSignal,mNewDictionary,tolerance1,szSignal, nAtoms,
         iOldDictionary,mOrthogonalDictionary,mBiorthogonal,vCoefficients));
         
-    double fullDict[100000];    
-	ifstream in("t4.txt");
+    double fullDict[nAtoms*szTest];
+	string fname = "g" + to_string(nAtoms) + to_string(szTest) + ".txt";
+	ifstream in(fname);
 	if (in.is_open()){
-		for(int i=0;i<100000;i++){
+		for(int i=0;i<nAtoms*szTest;i++){
 			in >> fullDict[i];
 		}
 	}
@@ -73,24 +75,24 @@ void start(double *vSignal, double *mDictionary, double tolerance1, int szSignal
     	printf("%f %d\n",vCoefficients[i], iOldDictionary[i]);
     }
     
-    double aSignal[1000];
-    for (int i=0;i<szSignal*10;i++)
+    double aSignal[szTest];
+    for (int i=0;i<szTest;i++)
 	{
 		double temp = 0;
     	for (int j=0;j<chosen;j++)
     	{
-      		temp += fullDict[iOldDictionary[j]*szSignal*10+i]*vCoefficients[j];
+      		temp += fullDict[iOldDictionary[j]*szTest+i]*vCoefficients[j];
     	}
     	aSignal[i] = temp;
   	}
   	
-  	printf("\naSignal\n");    
-    for(int i=0;i<szSignal*10;i++){
+  	printf("\naSignal\n");
+    for(int i=0;i<szTest;i++){
     	printf("%f ",aSignal[i]);
     }
     
     double max=0.0;
-    for(int i=0;i<(szSignal)*10;i++){
+    for(int i=0;i<szTest;i++){
     	if(abs(rSignal[i]-aSignal[i])>max){
     		max=abs(rSignal[i]-aSignal[i]);
 		}
@@ -100,28 +102,32 @@ void start(double *vSignal, double *mDictionary, double tolerance1, int szSignal
 	return;
 }
 
-int main(){
-int m = 100, n= 100, l = 1000, i,j;
-double vSignal[m];
-double rSignal[l];
-double mCosines[m*n];
-for(int i=0;i<m;i++){
-	vSignal[i] = atan(10*((i*0.01)+0.01));
-}
-for(int i=0;i<l;i++){
-	rSignal[i] = atan(10*((i*0.001)+0.001));
-}
-double tol = 0.0000001;
-ifstream in("t3.txt");
-if (in.is_open()){
-	for(int i=0;i<m*n;i++){
-		in >> mCosines[i];
+int main(int argc, char *argv[]){
+	int nAtoms, szSignal, szTest, i,j;
+	nAtoms = stoi(argv[1]);
+	szSignal = stoi(argv[2]);
+	szTest = stoi(argv[3]);
+	double vSignal[szSignal];
+	double rSignal[szTest];
+	double mCosines[szSignal*nAtoms];
+	for(int i=0;i<szSignal;i++){
+		vSignal[i] = atan(10*(i/float(szSignal)));
 	}
-}
-in.close();
-start(vSignal, mCosines, tol, m, n, rSignal);
-printf("\nrSignal\n");    
-    for(int i=0;i<l;i++){
+	for(int i=0;i<szTest;i++){
+		rSignal[i] = atan(10*(i/float(szTest)));
+	}
+	double tol = 0.0000001;
+	string fname = "g" + to_string(nAtoms) + to_string(szSignal) + ".txt";
+	ifstream in(fname);
+	if (in.is_open()){
+		for(int i=0;i<szSignal*nAtoms;i++){
+			in >> mCosines[i];
+		}
+	}
+	in.close();
+	start(vSignal, mCosines, tol, szSignal, nAtoms, szTest, rSignal);
+	printf("\nrSignal\n");    
+    for(int i=0;i<szTest;i++){
     	printf("%f ",rSignal[i]);
     }
 }
@@ -240,7 +246,11 @@ int omp(
         
         /* Calculate the norm of the residule */
         normResidule = sqrt(real_inner_product(residule,residule,szSignal));
-        
+		
+		for(int i=0;i<szSignal;i++){
+        	printf("%f ", residule[i]);
+		}
+		printf(" %f\n", normResidule);         
         
         /* Stopping criteria (distance)
          * MATLAB CODE - We use the residule check with omp if this is the same
