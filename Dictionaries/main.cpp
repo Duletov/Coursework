@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 
 #include "Dictionary.cpp"
 #include "GaborDictionary.cpp"
@@ -12,15 +13,26 @@ int main(int argc, char** argv) {
 	
 	int atomsCount =  std::stoi(argv[1]);
 	int signalSize = std::stoi(argv[2]);
-	int dictType = std::stoi(argv[3]);
-	
-	//TODO: здесь нужно сделать создание объекта нужного типа в зависимости от dictType
-	DctDictionary generator(atomsCount, signalSize);
+	char dictType = argv[3][0];
 	
 	double atoms[atomsCount * signalSize];
-	generator.CreateDictionary(&atoms[0]);
 	
-	auto fname = "d" + std::to_string(atomsCount) + std::to_string(signalSize) + ".txt";
+	if (dictType == 'd'){
+		DctDictionary generator(atomsCount, signalSize);
+		generator.CreateDictionary(atoms);
+	}
+	else{
+		if (dictType == 'g'){
+			GaborDictionary generator(atomsCount, signalSize);
+			generator.CreateDictionary(atoms);
+		}
+		else{
+			std::cout << "dictType is not defined";
+			return 1;
+		}
+	}
+	
+	auto fname = dictType + std::to_string(atomsCount) + std::to_string(signalSize) + ".txt";
 	std::ofstream outf(fname);
 	
 	for (int i = 0; i < atomsCount; i++) {
