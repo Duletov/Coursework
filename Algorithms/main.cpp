@@ -3,6 +3,7 @@
 
 #include "Algorithm.cpp"
 #include "OMP.cpp"
+#include "Lasso.cpp"
 
 int main(int argc, char** argv) {	
 	if (argc != 6)	{
@@ -57,8 +58,14 @@ int main(int argc, char** argv) {
 		instance.RunAlgorithm(vSignal, rSignal, mDictionary, fullDictionary);
 	}
 	else{
-		std::cout << "algoType is not defined";
-		return 1;
+		if (algoType == 'l'){
+			LassoAlgorithm instance(nAtoms, szSignal, szTest);
+			instance.RunAlgorithm(vSignal, rSignal, mDictionary, fullDictionary);
+		}
+		else{
+			std::cout << "algoType is not defined";
+			return 1;
+		}
 	}
 	
 	return 0;
