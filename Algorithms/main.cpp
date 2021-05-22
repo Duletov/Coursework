@@ -4,8 +4,9 @@
 #include "Algorithm.cpp"
 #include "OMP.cpp"
 #include "Lasso.cpp"
+#include "StOMP.cpp"
 
-int main(int argc, char** argv) {	
+int main(int argc, char** argv) {
 	if (argc != 6)	{
 		return -1;
 	}
@@ -63,8 +64,14 @@ int main(int argc, char** argv) {
 			instance.RunAlgorithm(vSignal, rSignal, mDictionary, fullDictionary);
 		}
 		else{
-			std::cout << "algoType is not defined";
-			return 1;
+			if (algoType == 's'){
+				StOMPAlgorithm instance(nAtoms, szSignal, szTest);
+				instance.RunAlgorithm(vSignal, rSignal, mDictionary, fullDictionary);
+			}
+			else{
+				std::cout << "algoType is not defined";
+				return 1;
+			}
 		}
 	}
 	
