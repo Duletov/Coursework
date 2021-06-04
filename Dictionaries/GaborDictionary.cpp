@@ -1,10 +1,8 @@
-#pragma once
 #define _USE_MATH_DEFINES
-
-#pragma once
 #include <cmath>
-
 #define sqr(x) ((x)*(x))
+
+#include "Dictionary.cpp"
 
 class GaborDictionary : public Dictionary {
 	

@@ -1,8 +1,7 @@
-﻿#pragma once
 #define _USE_MATH_DEFINES
-
-#pragma once
 #include <cmath>
+
+#include "Dictionary.cpp"
 
 class DctDictionary : public Dictionary {
 	

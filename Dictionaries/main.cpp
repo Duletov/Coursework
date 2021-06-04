@@ -4,6 +4,7 @@
 #include "Dictionary.cpp"
 #include "GaborDictionary.cpp"
 #include "DctDictionary.cpp"
+#include "SplineDictionary.cpp"
 
 int main(int argc, char** argv) {
 	
@@ -27,8 +28,14 @@ int main(int argc, char** argv) {
 			generator.CreateDictionary(atoms);
 		}
 		else{
-			std::cout << "dictType is not defined";
-			return 1;
+			if (dictType == 's'){
+				SplineDictionary generator(atomsCount, signalSize);
+				generator.CreateDictionary(atoms);
+			}
+			else{
+				std::cout << "dictType is not defined";
+				return 1;
+			}
 		}
 	}
 	
