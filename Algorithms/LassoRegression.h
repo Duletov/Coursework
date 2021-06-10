@@ -19,9 +19,9 @@ public:
 
     LassoRegression(std::vector<std::vector<double>> samples, std::vector<double> target);
 
-    double *predictions();
+    void predictions(double *result);
 
-    double *ro();
+    void ro(double *results);
 
     double coordinateDescentStep(int weightIdx, double alpha);
 
@@ -43,7 +43,7 @@ private:
 
     double *targetAsArray(std::vector<double> target);
 
-    double *feature(int featureIdx);
+    void feature(int featureIdx, double *result);
 };
 
 

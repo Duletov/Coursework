@@ -28,10 +28,5 @@ class GaborDictionary : public Dictionary {
 					atoms[i * signalSize + j] = 1.0 / sqrt(scale)  * exponent * cosinus;
 				}
 			}
-			
-			for(int i = 0; i < atomsCount; i++) {
-				//TODO: подключить библиотеку MathUtils и вызвать функцию оттуда
-				//normalize_vector(&atoms[i * signalSize], signalSize);
-			}
 		}
 };

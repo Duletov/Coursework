@@ -15,22 +15,23 @@ int main()
      probably doesn't refer to a valid audio file */
     assert (loadedOK);
 
-	auto fname = inputFilePath + ".txt";
-	std::ofstream outf(fname);
-
-    for (int i = 0; i < a.getNumSamplesPerChannel(); i++){
-        for (int channel = 0; channel < a.getNumChannels(); channel++){
-            outf << std::to_string(a.samples[channel][i]) << std::endl;
-        }
+	auto fname = inputFilePath + "_1000.txt";
+	std::ofstream outf1(fname);
+	int k = 0;
+	
+    for (int i = 1; i < 10001; i+=10){
+        outf1 << std::to_string(a.samples[0][i]) << std::endl;
+        k++;
     }
-    std::cout << a.getNumSamplesPerChannel() * a.getNumChannels() << std::endl;
+    std::cout << k << std::endl;
     
-    for (int i = 0; i < a.getNumSamplesPerChannel(); i+=10){
-        for (int channel = 0; channel < a.getNumChannels(); channel++){
-            outf << std::to_string(a.samples[channel][i]) << std::endl;
-        }
+    fname = inputFilePath + "_1000_test.txt";
+	std::ofstream outf2(fname);
+	
+    for (int i = 0; i < 10000; i++){
+        outf2 << std::to_string(a.samples[0][i]) << std::endl;
     }
-    std::cout << a.getNumSamplesPerChannel() * a.getNumChannels() / 10;
+    std::cout << a.getNumSamplesPerChannel() * a.getNumChannels() / 100;
     
     return 0;
 }

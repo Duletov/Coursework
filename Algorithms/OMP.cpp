@@ -9,6 +9,77 @@
 #include "Algorithm.cpp"
 
 class OMPAlgorithm : public Algorithm {
+	public:
+		OMPAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
+		
+
+		void RunAlgorithm(double* vSignal, double* rSignal, double* mDictionary, double* fullDictionary) override {
+			double *mNewDictionary = new double[szSignal*nAtoms];
+			double *mOrthogonalDictionary = new double[szSignal*szSignal];
+			double *mBiorthogonal = new double[szSignal*szSignal];
+			double *vCoefficients = new double[nAtoms];
+		    int *iOldDictionary = new int[nAtoms];
+		    int chosen;
+		    double tolerance1 = 0.0001;
+		    
+		    
+		    /* Perform deep copy of the original dictionary matrix */
+		    for ( int i = 0; i < nAtoms; i++ )
+		    {
+		        for ( int j = 0; j < szSignal; j++ )
+		        {
+		            mNewDictionary[(i*szSignal) + j] = mDictionary[(i*szSignal) + j];
+		        }
+		    }
+		
+		    chosen = (omp(vSignal,mNewDictionary,tolerance1,szSignal, nAtoms,
+		        iOldDictionary,mOrthogonalDictionary,mBiorthogonal,vCoefficients));
+		  	
+			printf("%d\n", chosen);
+		    printf("\nvCoefficients\n");    
+		    for(int i=0;i<chosen;i++){
+		    	printf("%f %d\n",vCoefficients[i], iOldDictionary[i]);
+		    }
+		    
+		    double aSignal[szTest];
+		    for (int i=0;i<szTest;i++){
+				double temp = 0;
+		    	for (int j=0;j<chosen;j++){
+					temp += fullDictionary[iOldDictionary[j]*szTest+i]*vCoefficients[j];
+		    	}
+		    	aSignal[i] = temp;
+			}
+		  	
+		  	printf("\naSignal\n");    
+		    for(int i=0;i<szTest;i++){
+		    	printf("%f ",aSignal[i]);
+		    }
+		    
+		    double max=0.0;
+		    int gde=0;
+		    for(int i=2;i<szTest/10;i++){
+		    	if(fabs(rSignal[i]-aSignal[i])>max){
+		    		max=fabs(rSignal[i]-aSignal[i]);
+		    		gde = i;
+				}
+			}
+			std::cout << std::endl << std::endl << "Diff " << gde << ' ' << std::setprecision(10) << max << std::endl;
+			
+			std::cout << std::endl << "rSignal" << std::endl;
+			for(int i=0;i<szTest;i++){
+				std::cout << rSignal[i] << ' ';
+			}
+		  	
+		  	delete [] mNewDictionary;
+			delete [] mOrthogonalDictionary;
+			delete [] mBiorthogonal;
+			delete [] vCoefficients;
+		    delete [] iOldDictionary;
+		    
+			return;
+		}
+	
+	
 	private:
 		double real_inner_product(double *v1, double *v2, int szVector)
 		{
@@ -304,10 +375,10 @@ class OMPAlgorithm : public Algorithm {
 		        /* Calculate the norm of the residue */
 		        normresidue = sqrt(real_inner_product(residue,residue,szSignal));
 		        
-		        for(int i=0;i<szSignal;i++){
+		        /*for(int i=0;i<szSignal;i++){
 		        	printf("%f ", residue[i]);
 				}
-				printf(" %f\n", normresidue); 
+				printf(" %f\n", normresidue); */
 		        
 		        /* Stopping criteria (distance)
 		         * MATLAB CODE - We use the residue check with omp if this is the same
@@ -335,64 +406,5 @@ class OMPAlgorithm : public Algorithm {
 		    }
 		    
 		    return k;
-		}
-	
-	public:
-		OMPAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
-		
-
-		void RunAlgorithm(double* vSignal, double* rSignal, double* mDictionary, double* fullDictionary) override {
-			double mNewDictionary[szSignal*nAtoms], mOrthogonalDictionary[szSignal*szSignal], mBiorthogonal[szSignal*szSignal], vCoefficients[nAtoms];
-		    int iOldDictionary[nAtoms];
-		    int chosen;
-		    double tolerance1 = 0.01;
-		    
-		    
-		    /* Perform deep copy of the original dictionary matrix */
-		    for ( int i = 0; i < nAtoms; i++ )
-		    {
-		        for ( int j = 0; j < szSignal; j++ )
-		        {
-		            mNewDictionary[(i*szSignal) + j] = mDictionary[(i*szSignal) + j];
-		        }
-		    }
-		
-		    chosen = (omp(vSignal,mNewDictionary,tolerance1,szSignal, nAtoms,
-		        iOldDictionary,mOrthogonalDictionary,mBiorthogonal,vCoefficients));
-		  	
-			printf("%d\n", chosen);
-		    printf("\nvCoefficients\n");    
-		    for(int i=0;i<chosen;i++){
-		    	printf("%f %d\n",vCoefficients[i], iOldDictionary[i]);
-		    }
-		    
-		    double aSignal[szTest];
-		    for (int i=0;i<szTest;i++){
-				double temp = 0;
-		    	for (int j=0;j<chosen;j++){
-					temp += fullDictionary[iOldDictionary[j]*szTest+i]*vCoefficients[j];
-		    	}
-		    	aSignal[i] = temp;
-			}
-		  	
-		  	printf("\naSignal\n");    
-		    for(int i=0;i<szTest;i++){
-		    	printf("%f ",aSignal[i]);
-		    }
-		    
-		    double max=0.0;
-		    for(int i=2;i<szTest-2;i++){
-		    	if(fabs(rSignal[i]-aSignal[i])>max){
-		    		max=fabs(rSignal[i]-aSignal[i]);
-				}
-			}
-			std::cout << std::endl << std::endl << "Diff " << std::setprecision(10) << max << std::endl;
-			
-			std::cout << std::endl << "rSignal" << std::endl;
-			for(int i=0;i<szTest;i++){
-				std::cout << rSignal[i] << ' ';
-			}
-		  	
-			return;
 		}
 };

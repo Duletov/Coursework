@@ -20,9 +20,7 @@ LassoRegression::LassoRegression(std::vector<std::vector<double>> samples, std::
 
 }
 
-double *LassoRegression::predictions() {
-    double *result = new double[numberOfSamples];
-
+void LassoRegression::predictions(double *result) {
     for (int sampleIdx = 0; sampleIdx < numberOfSamples; sampleIdx++) {
         double prediction = 0.0;
         for (int featureIdx = 0; featureIdx < numberOfFeatures; featureIdx++) {
@@ -31,27 +29,30 @@ double *LassoRegression::predictions() {
         result[sampleIdx] = prediction;
     }
 
-    return result;
+    return;
 }
 
-double *LassoRegression::ro() {
-    double *results = new double[numberOfFeatures];
-
+void LassoRegression::ro(double *results) {
     for (int idx = 0; idx < numberOfFeatures; idx++) {
-        double *penaltyVector = vectorMultiply(feature(idx), numberOfSamples, weights[idx]);
-        double *predictionDiff = vectorAdd(target, vectorMultiply(predictions(), numberOfSamples, -1), numberOfSamples);
-        double *roVector = vectorMultiplyComponentWise(feature(idx),
+    	double *fe = new double[numberOfSamples];
+    	double *pr = new double[numberOfSamples];
+    	feature(idx, fe);
+    	predictions(pr);
+        double *penaltyVector = vectorMultiply(fe, numberOfSamples, weights[idx]);
+        double *predictionDiff = vectorAdd(target, vectorMultiply(pr, numberOfSamples, -1), numberOfSamples);
+        double *roVector = vectorMultiplyComponentWise(fe,
                                                        vectorAdd(predictionDiff, penaltyVector, numberOfSamples),
                                                        numberOfSamples);
         double roValue = vectorSum(roVector, numberOfSamples);
         results[idx] = roValue;
+        delete [] fe;
+        delete [] pr;
     }
-
-    return results;
 }
 
 double LassoRegression::coordinateDescentStep(int weightIdx, double alpha) {
-    double *roValues = ro();
+    double *roValues = new double[numberOfFeatures];
+	ro(roValues);
 
 
     double newWeight;
@@ -65,17 +66,17 @@ double LassoRegression::coordinateDescentStep(int weightIdx, double alpha) {
     } else {
         newWeight = 0.0;
     }
-
+	delete [] roValues;
     return newWeight;
 }
 
 double *LassoRegression::cyclicalCoordinateDescent(double tolerance, double alpha) {
     bool condition = true;
     double maxChange;
+    double *newWeights = new double[numberOfFeatures];
 
     while (condition) {
         maxChange = 0.0;
-        double *newWeights = new double[numberOfFeatures];
 
         for (int weightIdx = 0; weightIdx < numberOfFeatures; ++weightIdx) {
             double oldWeight = weights[weightIdx];
@@ -88,7 +89,7 @@ double *LassoRegression::cyclicalCoordinateDescent(double tolerance, double alph
                 maxChange = coordinateChange;
             }
         }
-
+        
         if (maxChange < tolerance) {
             condition = false;
         }
@@ -114,10 +115,13 @@ double **LassoRegression::featuresMatrix(std::vector<std::vector<double>> sample
 double **LassoRegression::normalizeFeatures(double **matrix) {
 
     for (int featureIdx = 0; featureIdx < numberOfFeatures; ++featureIdx) {
-        double featureNorm = norm(feature(featureIdx), numberOfSamples);
+    	double *fe = new double[numberOfFeatures];
+    	feature(featureIdx, fe);
+        double featureNorm = norm(fe, numberOfSamples);
         for (int sampleIdx = 0; sampleIdx < numberOfSamples; ++sampleIdx) {
             matrix[sampleIdx][featureIdx] /= featureNorm;
         }
+        delete [] fe;
     }
 
     return matrix;
@@ -152,22 +156,14 @@ double *LassoRegression::targetAsArray(std::vector<double> target) {
     return result;
 }
 
-double *LassoRegression::feature(int featureIdx) {
-    double *result = new double[numberOfSamples];
-
+void LassoRegression::feature(int featureIdx, double *result) {
     for (int idx = 0; idx < numberOfSamples; idx++) {
         result[idx] = features[idx][featureIdx];
     }
 
-    return result;
+    return;
 }
 
 void LassoRegression::dumpWeightsToFile() {
-    std::ofstream file;
-    file.open("weights.txt");
 
-    for (int weightIdx = 0; weightIdx < numberOfFeatures; ++weightIdx) {
-        file << weights[weightIdx] << " ";
-    }
-    file.close();
 }

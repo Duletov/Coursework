@@ -1,25 +1,25 @@
 # Project: Dictionaries
-# Makefile created by Embarcadero Dev-C++ 6.3
+# Makefile created by Dev-C++ 5.11
 
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = main.o Dictionary.o GaborDictionary.o DctDictionary.o
-LINKOBJ  = main.o Dictionary.o GaborDictionary.o DctDictionary.o
-LIBS     = -L"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib" -L"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc
-INCS     = -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
-CXXINCS  = -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"C:/Program Files (x86)/Embarcadero/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
+OBJ      = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o MinSplineDictionary.o TrigSplineDictionary.o
+LINKOBJ  = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o MinSplineDictionary.o TrigSplineDictionary.o
+LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+INCS     = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
 BIN      = Dictionaries.exe
-CXXFLAGS = $(CXXINCS) 
-CFLAGS   = $(INCS) 
-DEL      = C:\Program Files (x86)\Embarcadero\Dev-Cpp\devcpp.exe INTERNAL_DEL
+CXXFLAGS = $(CXXINCS) -std=c++11
+CFLAGS   = $(INCS) -std=c++11
+RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
 
 all: all-before $(BIN) all-after
 
 clean: clean-custom
-	${DEL} $(OBJ) $(BIN)
+	${RM} $(OBJ) $(BIN)
 
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
@@ -35,3 +35,12 @@ GaborDictionary.o: GaborDictionary.cpp
 
 DctDictionary.o: DctDictionary.cpp
 	$(CPP) -c DctDictionary.cpp -o DctDictionary.o $(CXXFLAGS)
+
+SplineDictionary.o: SplineDictionary.cpp
+	$(CPP) -c SplineDictionary.cpp -o SplineDictionary.o $(CXXFLAGS)
+
+MinSplineDictionary.o: MinSplineDictionary.cpp
+	$(CPP) -c MinSplineDictionary.cpp -o MinSplineDictionary.o $(CXXFLAGS)
+
+TrigSplineDictionary.o: TrigSplineDictionary.cpp
+	$(CPP) -c TrigSplineDictionary.cpp -o TrigSplineDictionary.o $(CXXFLAGS)

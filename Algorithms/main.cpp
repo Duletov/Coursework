@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "Algorithm.cpp"
 #include "OMP.cpp"
@@ -25,18 +26,8 @@ int main(int argc, char** argv) {
 	if(!vSignal || !rSignal || !mDictionary || !fullDictionary)
 		exit(2);
 	
-	
-	
-	for(int i=0;i<szSignal;i++){
-		vSignal[i] = (i/double(szSignal))*(i/double(szSignal));
-	}
-	
-	for(int i=0;i<szTest;i++){
-		rSignal[i] = (i/double(szTest))*(i/double(szTest));
-	}
-	
-	std::string fname = dictType + std::to_string(nAtoms) + std::to_string(szSignal) + ".txt";
-	std::ifstream in(fname);
+	std::string fname = "dicts/" + std::string(1, dictType) + std::to_string(nAtoms) + std::to_string(szSignal) + ".txt";
+	std::ifstream in(fname.c_str());
 	if (in.is_open()){
 		for(int i=0;i<szSignal*nAtoms;i++){
 			in >> mDictionary[i];
@@ -44,14 +35,27 @@ int main(int argc, char** argv) {
 	}
 	in.close();
 	
-	fname = dictType + std::to_string(nAtoms) + std::to_string(szTest) + ".txt";
-	std::ifstream inn(fname);
+	fname = "dicts/" + std::string(1, dictType) + std::to_string(nAtoms) + std::to_string(szTest) + ".txt";
+	std::ifstream inn(fname.c_str());
 	if (inn.is_open()){
 		for(int i=0;i<szTest*nAtoms;i++){
 			inn >> fullDictionary[i];
 		}
 	}
 	inn.close();
+	
+	
+	fname = "signals/Black_Hole_Billiards.wav_1000.txt";
+	std::ifstream in2(fname.c_str());
+	for(int i=0;i<szSignal;i++){
+		in2 >> vSignal[i];
+	}
+	
+	fname = "signals/Black_Hole_Billiards.wav_1000_test.txt";
+	std::ifstream in3(fname.c_str());
+	for(int i=0;i<szTest;i++){
+		in3 >> rSignal[i];
+	}
 	
 	
 	if (algoType == 'o'){
