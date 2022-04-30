@@ -15,7 +15,7 @@ class LassoAlgorithm : public Algorithm {
 			DataSet dataSet(vSignal, mDictionary, nAtoms, szSignal);
     		LassoRegression *lasso = new LassoRegression(dataSet.sample, dataSet.target);
     		
-    		double *vCoefficients = lasso->cyclicalCoordinateDescent(0.001, 0.01);
+    		double *vCoefficients = lasso->cyclicalCoordinateDescent(0.03, 0.03);
     		
 		    printf("\nvCoefficients\n");    
 		    for(int i=0;i<nAtoms;i++){
@@ -37,7 +37,7 @@ class LassoAlgorithm : public Algorithm {
 		    }
 		    
 		    double max=0.0;
-		    for(int i=2;i<szTest-2;i++){
+		    for(int i=2;i<szTest/2;i++){
 		    	if(fabs(rSignal[i]-aSignal[i])>max){
 		    		max=fabs(rSignal[i]-aSignal[i]);
 				}

@@ -5,10 +5,10 @@
 
 #include "Dictionary.cpp"
 
-class TrigSplineDictionary : public Dictionary {
+class HypSplineDictionary : public Dictionary {
 	
 	public:
-		TrigSplineDictionary(int atomsCount, int signalSize, int testSize, int rightBorder) : Dictionary(atomsCount, signalSize, testSize, rightBorder) {}
+		HypSplineDictionary(int atomsCount, int signalSize, int testSize, int rightBorder) : Dictionary(atomsCount, signalSize, testSize, rightBorder) {}
 
 		void CreateDictionary(double* atoms, double* tests) override {
 			int counter = 0;
@@ -20,21 +20,21 @@ class TrigSplineDictionary : public Dictionary {
 					//std::cout << xi[i] << ' ';
 					xi[i+1]=xi[i]+delta_x;
 				}
-				//std::cout << xi[atomsCount+3] << std::endl << std::endl;
+				
 				for(int i=0;i<iter;counter++,i++){
 					for(int j=0;j<signalSize;j++){
 						double cur_position = (double(rightBorder)/(signalSize-1)*j);
 						//std::cout << cur_position << ' ';
 						if((cur_position >= xi[i]) and (cur_position < xi[i+1])){
-							atoms[counter*signalSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((cur_position - xi[i])/2)))/((sin((xi[i+2]-xi[i])/2))*(sin((xi[i+1]-xi[i])/2)));
+							atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+1]-xi[i])/2)*sinh((xi[i+2]-xi[i])/2));
 							//std::cout << 0 << ' ' << 1 << ' ' << cur_position << ' ' << xi[i] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+1] << std::endl;
 						}
 						else if((cur_position >= xi[i+1]) and (cur_position < xi[i+2])){
-							atoms[counter*signalSize+j] = ((cos((xi[i+2]-xi[i+1])/2))/(sin((xi[i+1]-xi[i])/2)))*(((sqr(sin((cur_position-xi[i])/2)))/(sin((xi[i+2]-xi[i])/2)))-((sin((xi[i+3]-xi[i])/2))*(sqr(sin((cur_position-xi[i+1])/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+2]-xi[i+1])/2)))));
+							atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))/(sinh((xi[i+1]-xi[i])/2)))*(((sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+2]-xi[i])/2)))-(((sinh((xi[i+3]-xi[i])/2))*(sqr(sinh((cur_position-xi[i+1])/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+2]-xi[i+1])/2)))));
 							//std::cout << 1 << ' ' << 2 << ' ' << cur_position << ' ' << xi[i+1] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+2] << std::endl;
 						}
 						else if((cur_position >= xi[i+2]) and (cur_position < xi[i+3])){
-							atoms[counter*signalSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((xi[i+3] - cur_position)/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+3]-xi[i+2])/2)));
+							atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*(sqr(sinh((xi[i+3]-cur_position)/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+3]-xi[i+2])/2)));
 							//std::cout << 2 << ' ' << 3 << ' ' << cur_position << ' ' << xi[i+2] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+3] << std::endl;
 						}
 						else{
@@ -42,20 +42,20 @@ class TrigSplineDictionary : public Dictionary {
 						}
 						//std::cout << atoms[i*signalSize+j] << ' ';
 					}
-					//std::cout << std::endl;
+					
 					for(int j=0;j<testSize;j++){
 						double cur_position = (double(rightBorder)/(testSize-1)*j);
-						//std::cout << cur_position << ' ';
+						//std::cout << testSize << ' ';
 						if((cur_position >= xi[i]) and (cur_position < xi[i+1])){
-							tests[counter*testSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((cur_position - xi[i])/2)))/((sin((xi[i+2]-xi[i])/2))*(sin((xi[i+1]-xi[i])/2)));
+							tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+1]-xi[i])/2)*sinh((xi[i+2]-xi[i])/2));
 							//std::cout << 0 << ' ' << 1 << ' ' << cur_position << ' ' << xi[i] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+1] << std::endl;
 						}
 						else if((cur_position >= xi[i+1]) and (cur_position < xi[i+2])){
-							tests[counter*testSize+j] = ((cos((xi[i+2]-xi[i+1])/2))/(sin((xi[i+1]-xi[i])/2)))*(((sqr(sin((cur_position-xi[i])/2)))/(sin((xi[i+2]-xi[i])/2)))-((sin((xi[i+3]-xi[i])/2))*(sqr(sin((cur_position-xi[i+1])/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+2]-xi[i+1])/2)))));
+							tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))/(sinh((xi[i+1]-xi[i])/2)))*(((sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+2]-xi[i])/2)))-(((sinh((xi[i+3]-xi[i])/2))*(sqr(sinh((cur_position-xi[i+1])/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+2]-xi[i+1])/2)))));
 							//std::cout << 1 << ' ' << 2 << ' ' << cur_position << ' ' << xi[i+1] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+2] << std::endl;
 						}
 						else if((cur_position >= xi[i+2]) and (cur_position < xi[i+3])){
-							tests[counter*testSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((xi[i+3] - cur_position)/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+3]-xi[i+2])/2)));
+							tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*(sqr(sinh((xi[i+3]-cur_position)/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+3]-xi[i+2])/2)));
 							//std::cout << 2 << ' ' << 3 << ' ' << cur_position << ' ' << xi[i+2] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+3] << std::endl;
 						}
 						else{
@@ -63,7 +63,6 @@ class TrigSplineDictionary : public Dictionary {
 						}
 						//std::cout << atoms[i*signalSize+j] << ' ';
 					}
-					//std::cout << std::endl;
 				}
 			}
 			int iter = atomsCount;
@@ -74,20 +73,21 @@ class TrigSplineDictionary : public Dictionary {
 				//std::cout << xi[i] << ' ';
 				xi[i+1]=xi[i]+delta_x;
 			}
+			//std::cout << iter << std::endl << std::endl;
 			for(int i=0;i<iter;counter++,i++){
 				for(int j=0;j<signalSize;j++){
 					double cur_position = (double(rightBorder)/(signalSize-1)*j);
 					//std::cout << cur_position << ' ';
 					if((cur_position >= xi[i]) and (cur_position < xi[i+1])){
-						atoms[counter*signalSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((cur_position - xi[i])/2)))/((sin((xi[i+2]-xi[i])/2))*(sin((xi[i+1]-xi[i])/2)));
+						atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+1]-xi[i])/2)*sinh((xi[i+2]-xi[i])/2));
 						//std::cout << 0 << ' ' << 1 << ' ' << cur_position << ' ' << xi[i] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+1] << std::endl;
 					}
 					else if((cur_position >= xi[i+1]) and (cur_position < xi[i+2])){
-						atoms[counter*signalSize+j] = ((cos((xi[i+2]-xi[i+1])/2))/(sin((xi[i+1]-xi[i])/2)))*(((sqr(sin((cur_position-xi[i])/2)))/(sin((xi[i+2]-xi[i])/2)))-((sin((xi[i+3]-xi[i])/2))*(sqr(sin((cur_position-xi[i+1])/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+2]-xi[i+1])/2)))));
+						atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))/(sinh((xi[i+1]-xi[i])/2)))*(((sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+2]-xi[i])/2)))-(((sinh((xi[i+3]-xi[i])/2))*(sqr(sinh((cur_position-xi[i+1])/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+2]-xi[i+1])/2)))));
 						//std::cout << 1 << ' ' << 2 << ' ' << cur_position << ' ' << xi[i+1] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+2] << std::endl;
 					}
 					else if((cur_position >= xi[i+2]) and (cur_position < xi[i+3])){
-						atoms[counter*signalSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((xi[i+3] - cur_position)/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+3]-xi[i+2])/2)));
+						atoms[counter*signalSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*(sqr(sinh((xi[i+3]-cur_position)/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+3]-xi[i+2])/2)));
 						//std::cout << 2 << ' ' << 3 << ' ' << cur_position << ' ' << xi[i+2] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+3] << std::endl;
 					}
 					else{
@@ -95,20 +95,19 @@ class TrigSplineDictionary : public Dictionary {
 					}
 					//std::cout << atoms[i*signalSize+j] << ' ';
 				}
-				//std::cout << std::endl;
 				for(int j=0;j<testSize;j++){
 					double cur_position = (double(rightBorder)/(testSize-1)*j);
-					//std::cout << cur_position << ' ';
+					//std::cout << testSize << ' ';
 					if((cur_position >= xi[i]) and (cur_position < xi[i+1])){
-						tests[counter*testSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((cur_position - xi[i])/2)))/((sin((xi[i+2]-xi[i])/2))*(sin((xi[i+1]-xi[i])/2)));
+						tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+1]-xi[i])/2)*sinh((xi[i+2]-xi[i])/2));
 						//std::cout << 0 << ' ' << 1 << ' ' << cur_position << ' ' << xi[i] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+1] << std::endl;
 					}
 					else if((cur_position >= xi[i+1]) and (cur_position < xi[i+2])){
-						tests[counter*testSize+j] = ((cos((xi[i+2]-xi[i+1])/2))/(sin((xi[i+1]-xi[i])/2)))*(((sqr(sin((cur_position-xi[i])/2)))/(sin((xi[i+2]-xi[i])/2)))-((sin((xi[i+3]-xi[i])/2))*(sqr(sin((cur_position-xi[i+1])/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+2]-xi[i+1])/2)))));
+						tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))/(sinh((xi[i+1]-xi[i])/2)))*(((sqr(sinh((cur_position-xi[i])/2)))/(sinh((xi[i+2]-xi[i])/2)))-(((sinh((xi[i+3]-xi[i])/2))*(sqr(sinh((cur_position-xi[i+1])/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+2]-xi[i+1])/2)))));
 						//std::cout << 1 << ' ' << 2 << ' ' << cur_position << ' ' << xi[i+1] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+2] << std::endl;
 					}
 					else if((cur_position >= xi[i+2]) and (cur_position < xi[i+3])){
-						tests[counter*testSize+j] = (cos((xi[i+2]-xi[i+1])/2))*(sqr(sin((xi[i+3] - cur_position)/2)))/((sin((xi[i+3]-xi[i+1])/2))*(sin((xi[i+3]-xi[i+2])/2)));
+						tests[counter*testSize+j] = ((cosh((xi[i+2]-xi[i+1])/2))*(sqr(sinh((xi[i+3]-cur_position)/2))))/((sinh((xi[i+3]-xi[i+1])/2))*(sinh((xi[i+3]-xi[i+2])/2)));
 						//std::cout << 2 << ' ' << 3 << ' ' << cur_position << ' ' << xi[i+2] << ' ' << atoms[i*signalSize+j] << ' ' << xi[i+3] << std::endl;
 					}
 					else{
@@ -116,8 +115,8 @@ class TrigSplineDictionary : public Dictionary {
 					}
 					//std::cout << atoms[i*signalSize+j] << ' ';
 				}
-				//std::cout << std::endl;
 			}
+			//std::cout << counter << std::endl << std::endl;
 			return;
 		}
 };

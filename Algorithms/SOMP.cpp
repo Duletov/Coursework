@@ -7,12 +7,13 @@
 #include <string>
 #include <iomanip>
 #include <algorithm>
+#include <vector>
 #include <omp.h>
 #include "Algorithm.cpp"
 
-class OMPAlgorithm : public Algorithm {
+class SplineOMPAlgorithm : public Algorithm {
 	public:
-		OMPAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
+		SplineOMPAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
 		
 
 		void RunAlgorithm(double* vSignal, double* rSignal, double* mDictionary, double* fullDictionary) override {
@@ -44,7 +45,6 @@ class OMPAlgorithm : public Algorithm {
 		    for(int i=0;i<chosen;i++){
 		    	printf("%f %d\n",vCoefficients[i], iOldDictionary[i]);
 		    }
-		    
 		    double aSignal[szTest];
 		    for (int i=0;i<szTest;i++){
 				double temp = 0;
@@ -55,29 +55,23 @@ class OMPAlgorithm : public Algorithm {
 		    	aSignal[i] = temp;
 //		    	std::cout << temp << " ";
 			}
-		  	
-		  	std::ofstream fout;
-			fout.open("imggg6.txt");
 			
 			printf("\naSignal\n");    
-		    for(int i=0;i<szTest;i++){
-		    	fout << aSignal[i] << std::endl;
-		    	//std::cout << aSignal[i] << ' ';
+		    /*for(int i=0;i<szTest;i++){
+		    	fout << aSignal[i] << ' ';
 		    }
-		    fout.close();
+		    fout.close();*/
 		    
-		    double max=0.0, max2 = 0.0;
-		    int gde=0;
+		    double max=0.0;
 		    #pragma omp for
 		    for(int i=2;i<szTest-2;i++){
-		    	if(fabs(rSignal[i]-aSignal[i])>max2){
-		    		max2=fabs(rSignal[i]-aSignal[i]);
-		    		gde = i;
-				}
+		    	//if(fabs(rSignal[i]-aSignal[i])>max){
+		    	//	max=fabs(rSignal[i]-aSignal[i]);
+		    	//	gde = i;
+				//}
 				max += (rSignal[i]-aSignal[i]) * (rSignal[i]-aSignal[i]);
 			}
 			std::cout << std::endl << std::endl << "Diff " << std::setprecision(10) << sqrt(max/szTest) << std::endl;
-			std::cout << std::endl << std::endl << "Diff " << std::setprecision(10) << max2 << std::endl;
 			
 		
 			
@@ -87,11 +81,11 @@ class OMPAlgorithm : public Algorithm {
 //			}
 		  	
 		  	
-		  	delete [] mNewDictionary;
-			delete [] mOrthogonalDictionary;
-			delete [] mBiorthogonal;
-			delete [] vCoefficients;
-		    delete [] iOldDictionary;
+		  	//delete [] mNewDictionary;
+			//delete [] mOrthogonalDictionary;
+			//delete [] mBiorthogonal;
+			//delete [] vCoefficients;
+		    //delete [] iOldDictionary;
 		    
 			return;
 		}
@@ -133,23 +127,40 @@ class OMPAlgorithm : public Algorithm {
 		    return returnVector;
 		}
 		
-		int choose_atom(double *residue, double *mUnselectedAtoms, int m, int n)
+		void choose_atom(double *residue, double *mUnselectedAtoms, int m, int n, std::vector<int> &chosenAtoms)
 		{
-		    int maxIndex = 0;
-		    double maxValue = 0, tolerance2 = 1e-10; // Should be global constant
+		    int leftIndex = 0, rightIndex = 0, maxIndex = 0;
+		    double localMaxValue = 0, maxValue = 0, tolerance2 = 1e-4; // Should be global constant
 		    double cc[n];
 			double *cc1 = trans_multyplication(residue, mUnselectedAtoms, cc, m, n);
 		    /* MATLAB CODE
 		     * [max_c,q]=max(cc);
 		     */
 		    #pragma omp for
-		    for ( int i = 0; i < n; i++)
+		    
+		    
+		    for ( int rightIndex = 0; rightIndex < n; rightIndex++)
 		    {
-		         if ( fabs(cc1[i]) > maxValue )
-		            {
-		                maxValue = fabs(cc1[i]);
-		                maxIndex = i;
-		            }             
+		        if(fabs(cc1[rightIndex]) > localMaxValue){
+	                maxIndex = rightIndex;
+	                localMaxValue = fabs(cc1[rightIndex]);
+	                if(rightIndex-leftIndex>2 && fabs(cc1[leftIndex]) > tolerance2){
+	                	chosenAtoms.push_back(leftIndex);
+	                	leftIndex = rightIndex;
+	                	if(cc1[leftIndex]>maxValue)
+							maxValue = cc1[leftIndex];
+					}
+	            }
+		        else{
+		        	if(rightIndex-leftIndex>2){
+	                	chosenAtoms.push_back(maxIndex);
+	                	leftIndex = rightIndex;
+	                	maxIndex = rightIndex;
+	                	localMaxValue = cc1[rightIndex];
+	                	if(cc1[maxIndex]>maxValue)
+							maxValue = cc1[maxIndex];
+					}
+				}
 		    }
 		    /* MATLAB CODE
 		     * if max_c<tol2 
@@ -157,15 +168,11 @@ class OMPAlgorithm : public Algorithm {
 		     *   break;
 		     * end
 		     */
+			
 		    if (maxValue < tolerance2)
 		    {
-		        maxIndex = -1;
+		    	chosenAtoms.clear();
 		    }
-		
-		    /* Free the memory */
-		
-		    return maxIndex;
-		  
 		}
 		
 		
@@ -205,7 +212,7 @@ class OMPAlgorithm : public Algorithm {
 		     */
 		
 		    double alpha;
-		    /* If picking more than 150 atoms may be quicker to use BLAS and the matrix vector multiplication */
+		    
 		    if ( k > 0 )
 		    {
 		        for ( int j = 0; j < k ; j++ )
@@ -299,7 +306,8 @@ class OMPAlgorithm : public Algorithm {
 		    
 		    
 		    /* Declare variables */
-		    int k, i, iChosenAtom, nIterations, iNewAtom;
+		    int k = -1, i, nIterations, iNewAtom, old, cAtom;
+		    std::vector<int> iChosenAtom;
 		    double normKthAtom, normresidue, swap;
 		    
 		    
@@ -323,8 +331,7 @@ class OMPAlgorithm : public Algorithm {
 		    
 		
 		    nIterations = std::min(nAtoms, szSignal);
-		    nIterations = 100;
-		
+			nIterations = 2;
 		    
 		
 		    
@@ -333,12 +340,13 @@ class OMPAlgorithm : public Algorithm {
 		    /*************************************************************/
 		    
 			
-		    for ( k = 0; k < nIterations; k++)
-		    {    
+		    for (int y = 0; y < nIterations; y++)
+		    {
+		    	k++;
 		        iNewAtom = k*szSignal;
 		        
 		        /* Choose the next atom from the unselected atoms. */ 
-		        iChosenAtom = choose_atom(residue,&mNewDictionary[iNewAtom],szSignal,(nAtoms - k));
+		        choose_atom(residue,&mNewDictionary[iNewAtom],szSignal,(nAtoms - k), iChosenAtom);
 		        
 		        /* Stopping criterion (coefficient)
 		         * MATLAB CODE
@@ -347,55 +355,67 @@ class OMPAlgorithm : public Algorithm {
 		         *      break;
 		         * end
 		         */
-		        if ( iChosenAtom == -1 )
+		        if ( iChosenAtom.size() == 0 )
 		        {
 		        	printf("No Good Atoms");
 		            break;            
 		        }
-		         
-		        /* Add k
-		         * because we want the index in the mNewDictionary array,
-		         * not the index in the smaller array we pass to choose_atom.
-		         */  
-		         iChosenAtom += k;
-		
-		        
-		        /* Populate the matrices with the new atoms
-		         * MATLAB CODE
-		         * if q~=k
-		         *      Q(:,[k q])=Q(:,[q k]); % swap k-th and q-th columns
-		         *      D(:,[k q])=D(:,[q k]);
-		         *      Di([k q])=Di([q k]);
-		         * end
-		         */        
-		        int temp = iOldDictionary[k];
-				iOldDictionary[k] = iOldDictionary[iChosenAtom];
-				iOldDictionary[iChosenAtom] = temp;
-		        swap_elements(&mNewDictionary[iNewAtom],&mNewDictionary[(iChosenAtom*szSignal)],szSignal);
-		        /* Pick the kth atom as we have swapped the chosen one */
-		        copy_elements(&mOrthogonalDictionary[iNewAtom],&mNewDictionary[iNewAtom],szSignal);
-		        
-		        
+		        old = k;
+		        k--;
+		        for(size_t p=0;p<iChosenAtom.size();p++){
+		        	k++;
+			        iNewAtom = k*szSignal;
+			        cAtom = iChosenAtom[p];
+		        	
+			        /* Add k
+			         * because we want the index in the mNewDictionary array,
+			         * not the index in the smaller array we pass to choose_atom.
+			         */
+			        cAtom += old;
+			
+			        
+			        /* Populate the matrices with the new atoms
+			         * MATLAB CODE
+			         * if q~=k
+			         *      Q(:,[k q])=Q(:,[q k]); % swap k-th and q-th columns
+			         *      D(:,[k q])=D(:,[q k]);
+			         *      Di([k q])=Di([q k]);
+			         * end
+			         */        
+			        int temp = iOldDictionary[k];
+					iOldDictionary[k] = iOldDictionary[cAtom];
+					iOldDictionary[cAtom] = temp;
+			        swap_elements(&mNewDictionary[iNewAtom],&mNewDictionary[(cAtom*szSignal)],szSignal);
+			        auto result1 = std::find(begin(iChosenAtom), end(iChosenAtom), k);
+			        if(result1 != end(iChosenAtom))
+			        	*result1 = cAtom;
+			        /* Pick the kth atom as we have swapped the chosen one */
+			        copy_elements(&mOrthogonalDictionary[iNewAtom],&mNewDictionary[iNewAtom],szSignal);
+			    }
+			    
 		        /* Re-orthogonalization of Q(:,k)  w.r.t Q(:,1),..., Q(:,k-1) */
 		        reorthognalize(mOrthogonalDictionary,szSignal,k,2);
 		                
-		        
 		        /* Normalize atom Q(:,k)
 		         * MATLAB CODE
 		         * nork=norm(Q(:,k));
 		         * Q(:,k)=Q(:,k)/nork; %normalization
-		         */      
-		        normKthAtom = normalize(&mOrthogonalDictionary[iNewAtom],szSignal);
-		         
-		        
-		        /* Compute biorthogonal functions beta*/
-		        calc_biorthogonal(mBiorthogonal, &mNewDictionary[iNewAtom], &mOrthogonalDictionary[iNewAtom], normKthAtom, szSignal, k);
-		         
-		        
-		        /* Calculate the residue */
-		        calc_residue(residue, vSignal, &mOrthogonalDictionary[iNewAtom], szSignal);
-		   
-		        
+		         */
+				for(int j=old;j<=k;j++){
+					normKthAtom = normalize(&mOrthogonalDictionary[j*szSignal],szSignal);
+					
+					/* Compute biorthogonal functions beta*/
+		        	calc_biorthogonal(mBiorthogonal, &mNewDictionary[iNewAtom], &mOrthogonalDictionary[iNewAtom], normKthAtom, szSignal, j);
+					
+					/* Calculate the residue */
+		        	calc_residue(residue, vSignal, &mOrthogonalDictionary[iNewAtom], szSignal);
+				}   
+		        /*for(int i=0;i<k;i++){
+			    	for(int j=0;j<szSignal;j++){
+			    		std::cout << mBiorthogonal[i*szSignal+j] << " ";
+					}
+					std::cout << std::endl;
+				}*/
 		        /* Calculate the norm of the residue */
 		        normresidue = sqrt(real_inner_product(residue,residue,szSignal));
 		        
@@ -409,7 +429,7 @@ class OMPAlgorithm : public Algorithm {
 		         * if (norm(f'-D(:,1:k)*(f*beta)')*sqrt(delta) < tol) && (tol~= 0)break;end;
 		         */
 		         
-		        if ( normresidue < tolerance1)
+		        if ( normresidue < tolerance1 && tolerance1 != 0 )
 		        {
 		            /* Break so will not increment k before exiting the loop */
 		            k += 1;
@@ -417,6 +437,7 @@ class OMPAlgorithm : public Algorithm {
 		            break;                          
 		        }
 		    	printf("%d %f\n", k, real_inner_product(residue,residue,szSignal));
+		    	iChosenAtom.clear();
 		    }
 		    /*Calculate the coefficients
 		    * MATLAB CODE

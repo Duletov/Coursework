@@ -7,12 +7,11 @@
 #include <string>
 #include <iomanip>
 #include <algorithm>
-#include <omp.h>
 #include "Algorithm.cpp"
 
-class OMPAlgorithm : public Algorithm {
+class OMPsAlgorithm : public Algorithm {
 	public:
-		OMPAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
+		OMPsAlgorithm(int nAtoms, int szSignal, int szTest) : Algorithm(nAtoms, szSignal, szTest) {}
 		
 
 		void RunAlgorithm(double* vSignal, double* rSignal, double* mDictionary, double* fullDictionary) override {
@@ -24,12 +23,10 @@ class OMPAlgorithm : public Algorithm {
 		    int chosen;
 		    double tolerance1 = 0.0001;
 		    
-			omp_set_num_threads(omp_get_num_procs());
 		    
 		    /* Perform deep copy of the original dictionary matrix */
 		    for ( int i = 0; i < nAtoms; i++ )
 		    {
-		    	#pragma omp for
 		        for ( int j = 0; j < szSignal; j++ )
 		        {
 		            mNewDictionary[(i*szSignal) + j] = mDictionary[(i*szSignal) + j];
@@ -48,7 +45,6 @@ class OMPAlgorithm : public Algorithm {
 		    double aSignal[szTest];
 		    for (int i=0;i<szTest;i++){
 				double temp = 0;
-				#pragma omp for
 		    	for (int j=0;j<chosen;j++){
 					temp += fullDictionary[iOldDictionary[j]*szTest+i]*vCoefficients[j];
 		    	}
@@ -61,23 +57,20 @@ class OMPAlgorithm : public Algorithm {
 			
 			printf("\naSignal\n");    
 		    for(int i=0;i<szTest;i++){
-		    	fout << aSignal[i] << std::endl;
-		    	//std::cout << aSignal[i] << ' ';
+		    	fout << aSignal[i] << ' ';
 		    }
 		    fout.close();
 		    
-		    double max=0.0, max2 = 0.0;
+		    double max=0.0;
 		    int gde=0;
-		    #pragma omp for
 		    for(int i=2;i<szTest-2;i++){
-		    	if(fabs(rSignal[i]-aSignal[i])>max2){
-		    		max2=fabs(rSignal[i]-aSignal[i]);
-		    		gde = i;
-				}
+		    	//if(fabs(rSignal[i]-aSignal[i])>max){
+		    	//	max=fabs(rSignal[i]-aSignal[i]);
+		    	//	gde = i;
+				//}
 				max += (rSignal[i]-aSignal[i]) * (rSignal[i]-aSignal[i]);
 			}
 			std::cout << std::endl << std::endl << "Diff " << std::setprecision(10) << sqrt(max/szTest) << std::endl;
-			std::cout << std::endl << std::endl << "Diff " << std::setprecision(10) << max2 << std::endl;
 			
 		
 			
@@ -101,7 +94,6 @@ class OMPAlgorithm : public Algorithm {
 		double real_inner_product(double *v1, double *v2, int szVector)
 		{
 		  double sum = 0;
-		  #pragma omp for
 		  for ( int i = 0; i < szVector; i++)
 		  {
 		    sum += v1[i]*v2[i];    
@@ -123,7 +115,6 @@ class OMPAlgorithm : public Algorithm {
 		    for (int i=0;i<n;i++)
 			{
 				double temp = 0;
-				#pragma omp for
 		    	for (int j=0;j<m;j++)
 		    	{
 		      		temp += matrix[i*m+j]*vector[j];
@@ -142,7 +133,6 @@ class OMPAlgorithm : public Algorithm {
 		    /* MATLAB CODE
 		     * [max_c,q]=max(cc);
 		     */
-		    #pragma omp for
 		    for ( int i = 0; i < n; i++)
 		    {
 		         if ( fabs(cc1[i]) > maxValue )
@@ -187,7 +177,6 @@ class OMPAlgorithm : public Algorithm {
 		            for ( int i = 0; i < k ; i++)
 		            {
 		                alpha = real_inner_product(&mOrthogonalDictionary[(i*szSignal)],&mOrthogonalDictionary[(k*szSignal)],szSignal);
-		                #pragma omp for
 		                for ( int j = 0; j < szSignal; j++)
 		                {
 		                    mOrthogonalDictionary[(k*szSignal) + j] = mOrthogonalDictionary[(k*szSignal)+j] - alpha*mOrthogonalDictionary[(i*szSignal) + j];
@@ -211,7 +200,6 @@ class OMPAlgorithm : public Algorithm {
 		        for ( int j = 0; j < k ; j++ )
 		        {
 		            alpha = real_inner_product(vNewAtom,&mBiorthogonal[(j*szSignal)],szSignal)/normAtom;
-					#pragma omp for
 		            for ( int i = 0; i < szSignal; i++ )
 		            {		 	  
 		                mBiorthogonal[(j*szSignal)+i] = mBiorthogonal[(j*szSignal)+i] - alpha*vOrthogonalAtom[i];        
@@ -223,7 +211,6 @@ class OMPAlgorithm : public Algorithm {
 		     * MATLAB CODE
 		     * beta(:,k)=Q(:,k)/nork; % kth biorthogonal function
 		     */        
-		    #pragma omp for
 		    for ( int i = 0; i< szSignal; i++ )
 		    {
 		        mBiorthogonal[(k*szSignal)+i] = vOrthogonalAtom[i]/normAtom;
@@ -241,8 +228,7 @@ class OMPAlgorithm : public Algorithm {
 		
 		    double alpha;
 		    
-		    alpha = real_inner_product(mOrthogonalDictionary,vSignal,szSignal); 
-			#pragma omp for   
+		    alpha = real_inner_product(mOrthogonalDictionary,vSignal,szSignal);   
 		    for ( int i = 0; i < szSignal; i++)
 		    {
 		       residue[i] = residue[i] - alpha*mOrthogonalDictionary[i];
@@ -253,7 +239,6 @@ class OMPAlgorithm : public Algorithm {
 		void swap_elements(double *swapA, double *swapB, int nRows)
 		{
 		    double swappedElement;
-		    #pragma omp for
 		    for ( int i = 0; i < nRows; i++ )
 		    {
 		        swappedElement = swapB[i];
@@ -274,7 +259,6 @@ class OMPAlgorithm : public Algorithm {
 		double normalize(double *atom, int szSignal)
 		{   
 		    double normAtom = sqrt(real_inner_product(atom,atom,szSignal));
-		    #pragma omp for
 		    for ( int i = 0; i < szSignal; i++)
 		    {
 		        atom[i] = atom[i]/normAtom;
@@ -311,7 +295,6 @@ class OMPAlgorithm : public Algorithm {
 		
 		   
 			/* Populate the index array - remember MATLAB index's start at 1 not 0*/
-			#pragma omp for
 		    for ( int i = 0; i < nAtoms; i++ )
 		    {
 		        iOldDictionary[i] = i;
@@ -323,7 +306,6 @@ class OMPAlgorithm : public Algorithm {
 		    
 		
 		    nIterations = std::min(nAtoms, szSignal);
-		    nIterations = 100;
 		
 		    
 		
@@ -409,20 +391,19 @@ class OMPAlgorithm : public Algorithm {
 		         * if (norm(f'-D(:,1:k)*(f*beta)')*sqrt(delta) < tol) && (tol~= 0)break;end;
 		         */
 		         
-		        if ( normresidue < tolerance1)
+		        if ( normresidue < tolerance1 && tolerance1 != 0 )
 		        {
 		            /* Break so will not increment k before exiting the loop */
 		            k += 1;
 		            printf("%d %f\n", k, real_inner_product(residue,residue,szSignal));
 		            break;                          
 		        }
-		    	printf("%d %f\n", k, real_inner_product(residue,residue,szSignal));
 		    }
+		    
 		    /*Calculate the coefficients
 		    * MATLAB CODE
 		    * c=f*beta;
 		    */
-		    #pragma omp for
 		    for ( i = 0; i <k; i++ )
 		    {
 		    	/*printf("%f ",vSignal);*/

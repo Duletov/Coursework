@@ -2,7 +2,6 @@
 // Created by user on 08.10.2018.
 //
 
-#include "matrix.h"
 #include <cmath>
 #include <iostream>
 

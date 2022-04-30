@@ -5,12 +5,12 @@
 
 #include "Dictionary.cpp"
 
-class MinSplineDictionary : public Dictionary {
+class MaxHypSplineDictionary : public Dictionary {
 	
 	public:
-		MinSplineDictionary(int atomsCount, int signalSize) : Dictionary(atomsCount, signalSize) {}
+		MaxHypSplineDictionary(int atomsCount, int signalSize, int testSize, int rightBorder) : Dictionary(atomsCount, signalSize, testSize, rightBorder) {}
 
-		void CreateDictionary(double* atoms) override {
+		void CreateDictionary(double* atoms, double* tests) override {
 			double delta_x = 1.0/(atomsCount - 1.0);
 			double xi[atomsCount+4];
 			xi[0] = -1.5*delta_x;

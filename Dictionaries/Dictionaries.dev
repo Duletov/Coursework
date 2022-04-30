@@ -23,13 +23,13 @@ OverrideOutputName=
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=1000 10000 s
+CommandLine=1000 1000 10000 1 h
 Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;4;0;0;0
-UnitCount=7
+UnitCount=10
 
 [VersionInfo]
 Major=1
@@ -101,7 +101,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit6]
-FileName=MinSplineDictionary.cpp
+FileName=TrigSplineDictionary.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -111,7 +111,37 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=TrigSplineDictionary.cpp
+FileName=MaxSplineDictionary.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit8]
+FileName=MaxTrigSplineDictionary.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit9]
+FileName=MaxHypSplineDictionary.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit10]
+FileName=HypSplineDictionary.cpp
 CompileCpp=1
 Folder=
 Compile=1

@@ -4,9 +4,9 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o MinSplineDictionary.o TrigSplineDictionary.o
-LINKOBJ  = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o MinSplineDictionary.o TrigSplineDictionary.o
-LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+OBJ      = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o TrigSplineDictionary.o MaxSplineDictionary.o MaxTrigSplineDictionary.o MaxHypSplineDictionary.o HypSplineDictionary.o
+LINKOBJ  = main.o Dictionary.o GaborDictionary.o DctDictionary.o SplineDictionary.o TrigSplineDictionary.o MaxSplineDictionary.o MaxTrigSplineDictionary.o MaxHypSplineDictionary.o HypSplineDictionary.o
+LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib"
 INCS     = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
 BIN      = Dictionaries.exe
@@ -39,8 +39,17 @@ DctDictionary.o: DctDictionary.cpp
 SplineDictionary.o: SplineDictionary.cpp
 	$(CPP) -c SplineDictionary.cpp -o SplineDictionary.o $(CXXFLAGS)
 
-MinSplineDictionary.o: MinSplineDictionary.cpp
-	$(CPP) -c MinSplineDictionary.cpp -o MinSplineDictionary.o $(CXXFLAGS)
-
 TrigSplineDictionary.o: TrigSplineDictionary.cpp
 	$(CPP) -c TrigSplineDictionary.cpp -o TrigSplineDictionary.o $(CXXFLAGS)
+
+MaxSplineDictionary.o: MaxSplineDictionary.cpp
+	$(CPP) -c MaxSplineDictionary.cpp -o MaxSplineDictionary.o $(CXXFLAGS)
+
+MaxTrigSplineDictionary.o: MaxTrigSplineDictionary.cpp
+	$(CPP) -c MaxTrigSplineDictionary.cpp -o MaxTrigSplineDictionary.o $(CXXFLAGS)
+
+MaxHypSplineDictionary.o: MaxHypSplineDictionary.cpp
+	$(CPP) -c MaxHypSplineDictionary.cpp -o MaxHypSplineDictionary.o $(CXXFLAGS)
+
+HypSplineDictionary.o: HypSplineDictionary.cpp
+	$(CPP) -c HypSplineDictionary.cpp -o HypSplineDictionary.o $(CXXFLAGS)
